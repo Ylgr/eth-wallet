@@ -15,7 +15,10 @@
             <p v-if="createWalletInfo">Address: {{createWalletInfo.address}}</p>
         </div>
         <div v-else>
-            Connect wallet success
+            <h1>Connect wallet success!</h1>
+            <p>Address: {{this.activeAddress}}</p>
+            <button v-on:click="() => sendBnb()">Send 0.1 BNB to 0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d</button>
+            <button v-on:click="() => sendDfy()">Send 0.1 DFY to 0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d</button>
         </div>
     </div>
 </template>
@@ -32,24 +35,28 @@
                 web3: null,
                 inputMnemonic: '',
                 inputPrivateKey: '',
+                activeAddress: '',
                 createWalletInfo: null
             }
         },
         methods: {
             inputWalletByMnemonic() {
-                console.log('this.inputMnemonic: ', this.inputMnemonic)
-                this.web3 = new Web3(new HDWalletProvider({
+                const provider = new HDWalletProvider({
                     mnemonic: {
                         phrase: this.inputMnemonic
                     },
                     providerOrUrl: "https://data-seed-prebsc-1-s1.binance.org:8545"
-                }))
+                })
+                this.web3 = new Web3(provider)
+                this.activeAddress = Object.keys(provider.wallets)[0]
             },
             inputWalletByPrivateKey() {
-                this.web3 = new Web3(new HDWalletProvider({
+                const provider = new HDWalletProvider({
                     privateKeys: [this.inputPrivateKey],
                     providerOrUrl: "https://data-seed-prebsc-1-s1.binance.org:8545"
-                }))
+                })
+                this.web3 = new Web3(provider)
+                this.activeAddress = Object.keys(provider.wallets)[0]
             },
             generateWallet() {
                 const mnemonic = generateMnemonic()
@@ -62,12 +69,17 @@
                 });
                 const address = Object.keys(provider.wallets)[0]
                 const wallet = provider.wallets[address]
-                console.log('wallet: ', wallet)
                 this.createWalletInfo = {
                     mnemonic: mnemonic,
                     privateKey: wallet.getPrivateKeyString(),
                     address: address
                 }
+            },
+            sendBnb() {
+
+            },
+            sendDfy() {
+
             }
         }
     }
