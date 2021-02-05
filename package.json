@@ -5,14 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@truffle/hdwallet-provider": "^1.2.1",
     "bip39": "^3.0.3",
     "core-js": "^3.6.5",
     "ethereumjs-wallet": "^1.0.1",
-    "i": "^0.3.6",
     "npm": "^7.5.2",
     "vue": "^2.6.11",
     "web3": "^1.3.4"
@@ -24,6 +24,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "gh-pages": "^3.1.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -44,5 +45,6 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "homepage": "https://ylgr.github.io/vue-eth-wallet/"
 }
