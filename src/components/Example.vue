@@ -26,13 +26,16 @@
 <script>
     import { generateMnemonic} from 'bip39';
     import Web3 from 'web3';
+    import BigNumber from 'bignumber.js';
     import HDWalletProvider from '@truffle/hdwallet-provider';
+    import dfyAbi from '../contracts/dfy.abi';
 
     export default {
         name: 'Example',
         data: function () {
             return {
                 web3: null,
+                dfyContract: null,
                 inputMnemonic: '',
                 inputPrivateKey: '',
                 activeAddress: '',
@@ -49,6 +52,7 @@
                 })
                 this.web3 = new Web3(provider)
                 this.activeAddress = Object.keys(provider.wallets)[0]
+                this.initDfyContract()
             },
             inputWalletByPrivateKey() {
                 const provider = new HDWalletProvider({
@@ -57,6 +61,13 @@
                 })
                 this.web3 = new Web3(provider)
                 this.activeAddress = Object.keys(provider.wallets)[0]
+                this.initDfyContract()
+            },
+            initDfyContract() {
+                this.dfyContract = new this.web3.eth.Contract(
+                    dfyAbi,
+                    '0xB6bd9Bba44C8369D47f07CcC9032e65E811A112d'
+                )
             },
             generateWallet() {
                 const mnemonic = generateMnemonic()
@@ -75,11 +86,38 @@
                     address: address
                 }
             },
-            sendBnb() {
-
+            async sendBnb() {
+                const gasPrice = await this.web3.eth.getGasPrice()
+                const tx = {
+                    to: '0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d',
+                    value: "1000000000000000000000",
+                    gas: 21000,
+                    gasPrice: gasPrice
+                }
+                const signed = await this.web3.eth.signTransaction(tx)
+                console.log('signed: ', signed)
+                const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction)
+                console.log('receipt: ', receipt)
             },
-            sendDfy() {
-
+            async sendDfy() {
+                const gasPrice = await this.web3.eth.getGasPrice()
+                const txData = this.dfyContract.methods.transfer(
+                    '0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d',
+                    new BigNumber(
+                        0.1
+                    ).multipliedBy(10 ** 18).integerValue()
+                ).encodeABI();
+                const tx = {
+                    to: '0xB6bd9Bba44C8369D47f07CcC9032e65E811A112d',
+                    value: 0,
+                    gas: 100000,
+                    gasPrice: gasPrice,
+                    data: txData
+                };
+                const signed = await this.web3.eth.signTransaction(tx)
+                console.log('signed: ', signed)
+                const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction)
+                console.log('receipt: ', receipt)
             }
         }
     }
