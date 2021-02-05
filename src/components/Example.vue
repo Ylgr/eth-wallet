@@ -17,8 +17,8 @@
         <div v-else>
             <h1>Connect wallet success!</h1>
             <p>Address: {{this.activeAddress}}</p>
-            <button v-on:click="() => sendBnb()">Send 0.1 BNB to 0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d</button>
-            <button v-on:click="() => sendDfy()">Send 0.1 DFY to 0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d</button>
+            <button v-on:click="() => sendBnb()">Send 0.1 BNB to 0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A</button>
+            <button v-on:click="() => sendDfy()">Send 0.1 DFY to 0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A</button>
         </div>
     </div>
 </template>
@@ -89,35 +89,41 @@
             async sendBnb() {
                 const gasPrice = await this.web3.eth.getGasPrice()
                 const tx = {
-                    to: '0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d',
-                    value: "1000000000000000000000",
+                    from: this.activeAddress,
+                    to: '0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A',
+                    value: new BigNumber(
+                        0.1
+                    ).multipliedBy(10 ** 18).toString(),
                     gas: 21000,
                     gasPrice: gasPrice
                 }
-                const signed = await this.web3.eth.signTransaction(tx)
+                const signed = await this.web3.eth.signTransaction(tx, this.activeAddress)
                 console.log('signed: ', signed)
-                const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction)
+                const receipt = await this.web3.eth.sendSignedTransaction(signed.raw)
                 console.log('receipt: ', receipt)
+                alert('send success: ' + receipt.transactionHash)
             },
             async sendDfy() {
                 const gasPrice = await this.web3.eth.getGasPrice()
                 const txData = this.dfyContract.methods.transfer(
-                    '0x469EA41396a3cD5D4c5aA96D8C9eaBd38f85d35d',
+                    '0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A',
                     new BigNumber(
                         0.1
                     ).multipliedBy(10 ** 18).integerValue()
                 ).encodeABI();
                 const tx = {
+                    from: this.activeAddress,
                     to: '0xB6bd9Bba44C8369D47f07CcC9032e65E811A112d',
                     value: 0,
                     gas: 100000,
                     gasPrice: gasPrice,
                     data: txData
                 };
-                const signed = await this.web3.eth.signTransaction(tx)
+                const signed = await this.web3.eth.signTransaction(tx, this.activeAddress)
                 console.log('signed: ', signed)
-                const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction)
+                const receipt = await this.web3.eth.sendSignedTransaction(signed.raw)
                 console.log('receipt: ', receipt)
+                alert('send success: ' + receipt.transactionHash)
             }
         }
     }
