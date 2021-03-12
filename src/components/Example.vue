@@ -5,6 +5,7 @@
       <p>Address: {{ this.activeAddress }}</p>
       <button v-on:click="() => sendBnb()">Send 0.1 BNB to 0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A</button>
       <button v-on:click="() => sendDfy()">Send 0.1 DFY to 0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A</button>
+      <button v-on:click="() => sendNft()">Send YLGR to 0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A</button>
     </div>
     <div v-else-if="web3KeyStore">
       <h1>Connect wallet success!</h1>
@@ -46,6 +47,7 @@ import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import dfyAbi from '../contracts/dfy.abi';
+import nftAbi from '../contracts/nft.abi';
 import fileDownload from 'js-file-download';
 
 export default {
@@ -55,6 +57,7 @@ export default {
       web3: null,
       web3KeyStore: null,
       dfyContract: null,
+      nftContract: null,
       inputMnemonic: '',
       inputPrivateKey: '',
       activeAddress: '',
@@ -106,6 +109,12 @@ export default {
           '0xB6bd9Bba44C8369D47f07CcC9032e65E811A112d'
       )
     },
+    initNftContract() {
+      this.nftContract = new this.web3.eth.Contract(
+          nftAbi,
+          '0x1eF2dB5a32A302Fba03466f3D490591e051d7ec7'
+      )
+    },
     generateWallet() {
       const mnemonic = generateMnemonic()
       console.log('mnemonic: ', mnemonic)
@@ -153,6 +162,28 @@ export default {
         to: '0xB6bd9Bba44C8369D47f07CcC9032e65E811A112d',
         value: 0,
         gas: 100000,
+        gasPrice: gasPrice,
+        data: txData
+      };
+      const signed = await this.web3.eth.signTransaction(tx, this.activeAddress)
+      console.log('signed: ', signed)
+      const receipt = await this.web3.eth.sendSignedTransaction(signed.raw)
+      console.log('receipt: ', receipt)
+      alert('send success: ' + receipt.transactionHash)
+    },
+    async sendNft() {
+      const gasPrice = await this.web3.eth.getGasPrice()
+      this.initNftContract()
+      const txData = this.nftContract.methods.safeTransferFrom(
+          this.activeAddress,
+          '0x8D7fa74e4c11a13F82412B391F2D9e1EEeA3326A',
+          2
+      ).encodeABI();
+      const tx = {
+        from: this.activeAddress,
+        to: '0x1eF2dB5a32A302Fba03466f3D490591e051d7ec7',
+        value: 0,
+        gas: 700000,
         gasPrice: gasPrice,
         data: txData
       };
